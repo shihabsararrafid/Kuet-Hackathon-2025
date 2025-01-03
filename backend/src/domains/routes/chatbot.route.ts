@@ -7,6 +7,12 @@ const router = express.Router();
 const chatbotRepository = new ChatbotRepository(prisma);
 const chatbotController = new ChatbotController(chatbotRepository);
 
+router.get(
+  "/chats",
+  checkAuth(),
+  //   validateRequest({ schema: registerSchema }),
+  (req, res, next) => chatbotController.getAllChats(req, res, next),
+);
 router.post(
   "/",
   checkAuth(),

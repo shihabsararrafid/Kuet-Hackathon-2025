@@ -164,6 +164,31 @@ export default class ChatbotRepository extends BaseRepository<Chat> {
       }
     }
   }
+  async getChats(userId: string): Promise<Partial<any>> {
+    try {
+      const chats = await this.prisma.chat.findMany({
+        where: {
+          userId,
+        },
+        include: {
+          messages: true,
+        },
+      });
+      return chats;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "database-error",
+          `Failed to load translations: ${
+            error instanceof Error ? error.message : "Unexpected error"
+          }`,
+          500,
+        );
+      }
+    }
+  }
   getById(id: string): Promise<Partial<Chat> | null> {
     throw new Error("Method not implemented.");
   }

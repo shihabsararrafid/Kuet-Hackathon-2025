@@ -39,6 +39,7 @@ type PDFFile = {
 type StoredPDF = {
   id: string;
   title: string;
+  pdfLink: string;
   path: string;
   uploadedAt: string;
 };
@@ -105,16 +106,48 @@ const BanglishChatbot: React.FC = () => {
   };
 
   // Handle PDF selection from stored PDFs
-  const handleStoredPDFSelection = (pdf: StoredPDF) => {
-    const newPDFFile: PDFFile = {
-      id: pdf.id,
-      name: pdf.title,
-      path: pdf.path,
-    };
+  const handleStoredPDFSelection = async (pdf: StoredPDF) => {
+    console.log(pdf);
+    try {
+      setIsStoredPDFDialogOpen(false);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chatbot/from-pdf`,
+        {
+          pdfLink: pdf.pdfLink,
+        },
+        { withCredentials: true }
+      );
+      console.log(response.data.data.messages[0].question);
 
-    setAttachedPDF(newPDFFile);
-    setIsStoredPDFDialogOpen(false);
-    toast({ title: `${pdf.title} added successfully` });
+      // Set current chat ID
+      setCurrentChatId(response.data.data.id);
+      const userMessage: MessageType = {
+        id: `user-${Date.now()}`,
+        content: response.data.data.messages[0].question,
+        role: "user",
+        timestamp: new Date(),
+      };
+
+      // Optimistically add user message
+      setMessages([userMessage]);
+      // Update messages
+      const aiMessage: MessageType = {
+        id: `ai-${Date.now()}`,
+        content: response.data.data.messages[0].content,
+        role: "ai",
+        timestamp: new Date(),
+      };
+
+      setMessages([aiMessage]);
+
+      toast({ title: `added successfully` });
+    } catch (error) {
+      toast({
+        title: "Failed to create chat from PDF",
+        variant: "destructive",
+      });
+      console.error(error);
+    }
   };
 
   // Upload PDF handler with dropdown

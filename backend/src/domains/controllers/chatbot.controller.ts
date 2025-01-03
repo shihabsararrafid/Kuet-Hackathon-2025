@@ -67,4 +67,20 @@ export default class ChatbotController extends BaseController {
       }
     }
   }
+  async getAllChats(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const messages = await this.chatbotRepository.getChats(req.user.id);
+      this.sendSuccessResponse(res, messages);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
 }
