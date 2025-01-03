@@ -12,15 +12,35 @@ export default class TranslationRepository extends BaseRepository<translations> 
   constructor(prisma: PrismaClient) {
     super(prisma);
   }
-  getAll(): Promise<Partial<translations>[]> {
-    throw new Error("Method not implemented.");
+  async getAll(userId: string): Promise<Partial<translations>[]> {
+    try {
+      const result = await this.prisma.translations.findMany({
+        where: {
+          userId,
+        },
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "database-error",
+          `Failed to load translations: ${
+            error instanceof Error ? error.message : "Unexpected error"
+          }`,
+          500,
+        );
+      }
+    }
   }
   getById(id: string): Promise<Partial<translations> | null> {
     throw new Error("Method not implemented.");
   }
-  async translate(data: { rawText: string }): Promise<Partial<translations>> {
-    // generate salt and hashed password
-    console.log(data.rawText);
+  async translate(
+    data: { rawText: string },
+    userId: string,
+  ): Promise<Partial<translations>> {
     try {
       // Store the original formatted text
       const formattedText = data.rawText;
@@ -29,7 +49,7 @@ export default class TranslationRepository extends BaseRepository<translations> 
       const root = parse(data.rawText);
       const rawTextWithoutHtml = root.textContent;
 
-      console.log("Stripped text:", rawTextWithoutHtml);
+      //   console.log("Stripped text:", rawTextWithoutHtml);
 
       // Call translation API with stripped text
       const response = await axios.post("http://192.168.11.97:6000/translate", {
@@ -76,6 +96,7 @@ export default class TranslationRepository extends BaseRepository<translations> 
         data: {
           rawText: formattedText,
           translatedText: formattedTranslation,
+          userId,
         },
       });
     } catch (error) {
@@ -142,13 +163,27 @@ export default class TranslationRepository extends BaseRepository<translations> 
         printBackground: true,
       };
 
-      // Generate PDF
-      const file = { content: htmlContent };
-      const pdfBuffer = await htmlPdf.generatePdf(file, options);
+      // Generate PDF with error handling
+      let pdfBuffer;
+      try {
+        const file = { content: htmlContent };
+        pdfBuffer = await htmlPdf.generatePdf(file, options);
+      } catch (error) {
+        console.error("PDF generation error:", error);
+        throw new AppError(
+          "pdf-generation-error",
+          "Failed to generate PDF",
+          500,
+        );
+      }
 
-      // Save the PDF
-      fs.writeFileSync(filePath, pdfBuffer as any);
-
+      // Save the PDF with error handling
+      try {
+        await fs.promises.writeFile(filePath, pdfBuffer as any);
+      } catch (error) {
+        console.error("Error saving PDF:", error);
+        throw new AppError("file-system-error", "Failed to save PDF file", 500);
+      }
       const fileLink = `http://localhost:5000/files/${filename}`;
       const pdf = await this.prisma.translations.update({
         where: { id },

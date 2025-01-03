@@ -5,8 +5,8 @@ const isDevelopment = config.NODE_ENV === "development";
 // Common cookie options
 const cookieOptions = {
   httpOnly: true, // Prevents JavaScript access
-  sameSite: "None", //isDevelopment ? "lax" : "strict", // CSRF protection
-  secure: true, // false in development, true in production  // Only sent over HTTPS
+  sameSite: isDevelopment ? undefined : "None", // CSRF protection
+  secure: false, // false in development, true in production  // Only sent over HTTPS
   signed: true,
 };
 export const AuthCookie = {
@@ -14,7 +14,7 @@ export const AuthCookie = {
     // Access token in memory-only cookie
     // Short lived (15-60 minutes typically)
 
-    res.cookie("access_token", accessToken, {
+    const r = res.cookie("access_token", accessToken, {
       ...(cookieOptions as CookieOptions),
       maxAge: 900000, // 15 minutes
       path: "/",
@@ -26,7 +26,7 @@ export const AuthCookie = {
     res.cookie("refresh_token", refreshToken, {
       ...(cookieOptions as CookieOptions),
       maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
-      path: "/api/v1", // Restricted path
+      // path: "/api/v1", // Restricted path
       signed: true,
     });
   },

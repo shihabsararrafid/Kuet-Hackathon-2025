@@ -18,10 +18,13 @@ export const checkAuth = (types?: string[], required = true) => {
         req.signedCookies.access_token ??
         req.cookies.access_token ??
         req.header("authentication")?.split(" ")[1];
-      // console.log(token, "token");
+      // console.log(req.signedCookies, "token");
       if (!token && !required) {
         req.user = null;
         return next();
+      }
+      if (!token && req.signedCookies.refresh_token) {
+        throw new AppError("Not-found", "Token has expired", 401);
       }
       if (!token) throw new AppError("Auth-error", "You Are Unauthorized", 401);
 
@@ -37,7 +40,7 @@ export const checkAuth = (types?: string[], required = true) => {
       }
       return next();
     } catch (error) {
-      console.log(console.error(error));
+      // console.log(console.error(error), error.message);
       if (error instanceof Error && error.message === "Token has expired") {
         const refresh_token =
           req.signedCookies.refresh_token ?? req.cookies.refresh_token;

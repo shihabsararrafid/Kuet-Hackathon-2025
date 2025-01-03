@@ -50,15 +50,7 @@ const data = {
         },
         {
           title: "Saved Translations",
-          url: "/translation/saved",
-        },
-        {
-          title: "Translation History",
-          url: "/translation/history",
-        },
-        {
-          title: "Custom Dictionary",
-          url: "/translation/dictionary",
+          url: "/translations",
         },
       ],
     },
@@ -73,10 +65,6 @@ const data = {
         {
           title: "Saved Conversations",
           url: "/chat/saved",
-        },
-        {
-          title: "Chat Templates",
-          url: "/chat/templates",
         },
       ],
     },
@@ -107,68 +95,6 @@ const data = {
         {
           title: "Notification Settings",
           url: "/profile/notifications",
-        },
-      ],
-    },
-    {
-      title: "Tools & Utilities",
-      url: "/tools",
-      items: [
-        {
-          title: "Pronunciation Guide",
-          url: "/tools/pronunciation",
-        },
-        {
-          title: "Grammar Check",
-          url: "/tools/grammar",
-        },
-        {
-          title: "Text to Speech",
-          url: "/tools/tts",
-        },
-        {
-          title: "Spell Check",
-          url: "/tools/spell-check",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      items: [
-        {
-          title: "Preferences",
-          url: "/settings/preferences",
-        },
-        {
-          title: "Language Settings",
-          url: "/settings/language",
-        },
-        {
-          title: "Account Security",
-          url: "/settings/security",
-        },
-        {
-          title: "API Keys",
-          url: "/settings/api-keys",
-        },
-      ],
-    },
-    {
-      title: "Help & Resources",
-      url: "/help",
-      items: [
-        {
-          title: "User Guide",
-          url: "/help/guide",
-        },
-        {
-          title: "FAQs",
-          url: "/help/faqs",
-        },
-        {
-          title: "Contact Support",
-          url: "/help/support",
         },
       ],
     },

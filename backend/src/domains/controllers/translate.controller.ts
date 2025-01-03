@@ -14,8 +14,27 @@ export default class TranslationController extends BaseController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const user = await this.translationRepository.translate(req.body);
+      const user = await this.translationRepository.translate(
+        req.body,
+        req.user.id,
+      );
       this.sendSuccessResponse(res, user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
+  async getTranslations(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const translations = await this.translationRepository.getAll(req.user.id);
+      this.sendSuccessResponse(res, translations);
     } catch (error) {
       if (error instanceof AppError) {
         this.sendErrorResponse(res, error);

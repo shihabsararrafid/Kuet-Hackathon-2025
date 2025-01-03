@@ -55,8 +55,8 @@ export default class AuthController extends BaseController {
 
       this.sendSuccessResponse(res, {
         ...user,
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
+        // accessToken: token.accessToken,
+        // refreshToken: token.refreshToken,
       });
     } catch (error) {
       if (error instanceof AppError) {

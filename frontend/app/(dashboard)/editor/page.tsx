@@ -67,6 +67,7 @@ export default function TranslationForm() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             rawText: values.about, // Assuming 'about' contains the text to translate
           }),
@@ -130,6 +131,7 @@ export default function TranslationForm() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             isPublic: false, // or true based on your needs
           }),
@@ -171,6 +173,7 @@ export default function TranslationForm() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             visibility: visibility,
           }),

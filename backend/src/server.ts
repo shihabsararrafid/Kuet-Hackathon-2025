@@ -22,7 +22,7 @@ const createExpressApp = (): Express => {
   const expressApp: Express = express();
   expressApp.use(requestIdMiddleware.addRequestIdMiddleware);
   expressApp.use(helmet());
-  expressApp.use(cookieParser(config.COOKIE_SECRET));
+
   expressApp.use(urlencoded({ extended: true }));
   expressApp.use(json());
   expressApp.use(
@@ -35,7 +35,7 @@ const createExpressApp = (): Express => {
       credentials: true,
     }),
   );
-
+  expressApp.use(cookieParser(config.COOKIE_SECRET));
   expressApp.use((req: Request, res: Response, next: NextFunction) => {
     logger.info(`${req.method} ${req.originalUrl}`);
     next();

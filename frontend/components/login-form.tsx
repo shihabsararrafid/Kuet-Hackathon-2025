@@ -49,6 +49,7 @@ export function LoginForm({
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include", // This is crucial
           body: JSON.stringify(formData),
         }
       );
