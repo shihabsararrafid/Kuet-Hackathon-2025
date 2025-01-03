@@ -13,6 +13,7 @@ import config from "./configs";
 import prisma from "./libraries/db/prisma";
 import { errorHandler } from "./libraries/error-handling";
 import { logger } from "./libraries/log/logger";
+import cookieParser from "cookie-parser";
 import requestIdMiddleware from "./middlewares/request-context";
 
 let connection: Server;
@@ -21,6 +22,7 @@ const createExpressApp = (): Express => {
   const expressApp: Express = express();
   expressApp.use(requestIdMiddleware.addRequestIdMiddleware);
   expressApp.use(helmet());
+  expressApp.use(cookieParser(config.COOKIE_SECRET));
   expressApp.use(urlencoded({ extended: true }));
   expressApp.use(json());
 
@@ -57,7 +59,7 @@ async function stopWebServer(): Promise<void> {
 }
 
 async function openConnection(
-  expressApp: Express
+  expressApp: Express,
 ): Promise<{ address: string; port: number }> {
   return new Promise((resolve) => {
     const webServerPort = config.PORT;
@@ -88,7 +90,7 @@ function defineErrorHandlingMiddleware(expressApp: Express): void {
 
       errorHandler.handleError(error);
       res.status(error?.HTTPStatus || 500).end();
-    }
+    },
   );
 }
 

@@ -31,15 +31,7 @@ try:
     model_name = "Mdkaif2782/banglish-to-bangla"
     tokenizer = MBart50TokenizerFast.from_pretrained(model_name)
     model = MBartForConditionalGeneration.from_pretrained(model_name)
-    
-    # Move model to GPU if available
-    if torch.cuda.is_available():
-        model = model.cuda()
-        print("Model loaded on GPU")
-    else:
-        print("Model loaded on CPU")
-    
-    print("Model and tokenizer loaded successfully")
+    print("Model and tokenizer loaded successfully on CPU")
 except Exception as e:
     print(f"Error loading model: {str(e)}")
     raise
@@ -48,10 +40,6 @@ def translate_text(text: str) -> str:
     try:
         # Tokenize input text
         inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-        
-        # Move inputs to GPU if available
-        if torch.cuda.is_available():
-            inputs = {key: value.cuda() for key, value in inputs.items()}
         
         # Generate translation
         with torch.no_grad():
@@ -97,8 +85,7 @@ async def health_check():
     return {
         "status": "healthy",
         "model_loaded": model is not None,
-        "tokenizer_loaded": tokenizer is not None,
-        "gpu_available": torch.cuda.is_available()
+        "tokenizer_loaded": tokenizer is not None
     }
 
 if __name__ == "__main__":
