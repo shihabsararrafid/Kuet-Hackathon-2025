@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserCircle, Settings, LogOut, Bell } from "lucide-react";
+import Link from "next/link";
 
 // Sample user data - in a real app, this would come from your auth system
 const userData = {
@@ -32,7 +33,7 @@ const userData = {
   email: "john@example.com",
   avatar: "/api/placeholder/32/32",
   role: "Premium User",
-  notifications: 3
+  notifications: 3,
 };
 
 const data = {
@@ -44,7 +45,7 @@ const data = {
       items: [
         {
           title: "Banglish to Bangla",
-          url: "/translation/banglish-to-bangla",
+          url: "/editor",
           isActive: true,
         },
         {
@@ -194,7 +195,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
         <SearchForm />
       </SidebarHeader>
-      
+
       <SidebarContent>
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
@@ -204,7 +205,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                      <Link href={item.url}>{item.title}</Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -217,13 +218,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="border-t p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full flex items-center gap-2 px-2">
+            <Button
+              variant="ghost"
+              className="w-full flex items-center gap-2 px-2"
+            >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={userData.avatar} alt={userData.name} />
                 <AvatarFallback>{userData.name.slice(0, 2)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-left">
-                <p className="text-sm font-medium leading-none">{userData.name}</p>
+                <p className="text-sm font-medium leading-none">
+                  {userData.name}
+                </p>
                 <p className="text-xs text-muted-foreground">{userData.role}</p>
               </div>
             </Button>
@@ -247,7 +253,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
   );
