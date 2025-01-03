@@ -26,6 +26,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@prisma/client": "^5.19.1",
     "@react-email/components": "0.0.31",
     "@types/express": "^4.17.21",

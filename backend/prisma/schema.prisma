@@ -21,6 +21,7 @@ model User{
   isActive         Boolean   @default(true)
   role             Role   @default(USER)
   transaltions   translations[]
+  chats           Chat[]
   @@index([email])
 }
 model translations {
@@ -37,7 +38,24 @@ model translations {
   userId        String?
   user           User?    @relation(fields: [userId],references: [id],onDelete: Cascade)
 }
+model Chat {
+  id          String       @id @default(cuid())
+  userId      String
+  title       String?
+  messages    Message[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id])
+}
 
+model Message {
+  id          Int       @id 
+  chatId      String
+  question    String
+  content     String
+  createdAt   DateTime     @default(now())
+  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
 enum Role {
   USER
   ADMIN

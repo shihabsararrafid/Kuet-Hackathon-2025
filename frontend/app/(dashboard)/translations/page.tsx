@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 interface Translation {
   id: string;
   rawText: string;
@@ -40,6 +41,7 @@ const TranslationsPage = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isPdfLoading, setPDfIsLoading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const router = useRouter();
   React.useEffect(() => {
     const fetchTranslations = async () => {
       try {
@@ -148,7 +150,11 @@ const TranslationsPage = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Your Translations</h1>
-        <Button size="lg" className="gap-2">
+        <Button
+          onClick={() => router.push("/editor")}
+          size="lg"
+          className="gap-2"
+        >
           <Languages className="h-4 w-4" />
           New Translation
         </Button>

@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserCircle, Settings, LogOut, Bell } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Sample user data - in a real app, this would come from your auth system
 const userData = {
@@ -102,6 +104,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathName = usePathname();
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -130,7 +133,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.url.startsWith(pathName)}
+                    >
                       <Link href={item.url}>{item.title}</Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
