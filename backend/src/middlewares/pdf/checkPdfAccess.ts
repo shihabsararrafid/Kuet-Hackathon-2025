@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { PrismaClient, translations } from "@prisma/client";
 import path from "path";
-
 const prisma = new PrismaClient();
-
 // Middleware to check PDF access
 export const checkPdfAccess = async (
   req: Request,
@@ -26,7 +24,7 @@ export const checkPdfAccess = async (
         message: "PDF not found",
       });
     // If no record found or PDF is not public
-    if (await checkAccess(translation, req?.user?.id)) {
+    if (!(await checkAccess(translation, req?.user?.id))) {
       return res.status(403).json({
         success: false,
         message: "Access denied. This PDF is not public.",

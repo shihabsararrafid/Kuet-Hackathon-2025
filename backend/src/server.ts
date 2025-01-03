@@ -15,7 +15,7 @@ import { errorHandler } from "./libraries/error-handling";
 import { logger } from "./libraries/log/logger";
 import cookieParser from "cookie-parser";
 import requestIdMiddleware from "./middlewares/request-context";
-
+import cors from "cors";
 let connection: Server;
 
 const createExpressApp = (): Express => {
@@ -25,6 +25,16 @@ const createExpressApp = (): Express => {
   expressApp.use(cookieParser(config.COOKIE_SECRET));
   expressApp.use(urlencoded({ extended: true }));
   expressApp.use(json());
+  expressApp.use(
+    cors({
+      origin: [
+        config.CLIENT_URL,
+        "http://localhost:3000",
+        "http://192.168.12.65:3000",
+      ],
+      credentials: true,
+    }),
+  );
 
   expressApp.use((req: Request, res: Response, next: NextFunction) => {
     logger.info(`${req.method} ${req.originalUrl}`);

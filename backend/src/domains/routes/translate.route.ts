@@ -16,5 +16,11 @@ router.post(
   //   validateRequest({ schema: registerSchema }),
   (req, res, next) => translationController.generatePdf(req, res, next),
 );
+router.patch(
+  "/shareability/:id",
+  //   validateRequest({ schema: registerSchema }),
+  (req, res, next) =>
+    translationController.updatePDFShareability(req, res, next),
+);
 
 export default router;

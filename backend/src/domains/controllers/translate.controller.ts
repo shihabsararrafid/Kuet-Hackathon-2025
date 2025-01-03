@@ -41,4 +41,24 @@ export default class TranslationController extends BaseController {
       }
     }
   }
+  async updatePDFShareability(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.translationRepository.updateShareAbility(
+        req.body,
+        id,
+      );
+      this.sendSuccessResponse(res, user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
 }

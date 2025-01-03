@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SideBar from "@/components/sidebar/Sidebar";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -13,6 +14,7 @@ export default function DashboardLayout({
 }>) {
   return (
     <html lang="en">
+      <Toaster />
       <body className="flex">
         <SideBar>{children}</SideBar>
         {/* <div className="flex-1">{children}</div> */}
