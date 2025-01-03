@@ -20,10 +20,30 @@ model User{
   isEmailVerified  Boolean   @default(false)
   isActive         Boolean   @default(true)
   role             Role   @default(USER)
-
+  transaltions   translations[]
   @@index([email])
 }
+model translations {
+  id         String  @id @default(cuid())
+  rawText    String
+  tranlatedText String
+  pdfLink       String?
+  visibility    Visibility @default(PRIVATE)  // New field
+  isPublic      Boolean   @default(false)
+  title         String?
+  caption       String?
+  createdAt     DateTime  @default(now())
+  totalVisits   Int      @default(0)
+  userId        String?
+  user           User?    @relation(fields: [userId],references: [id],onDelete: Cascade)
+}
+
 enum Role {
   USER
   ADMIN
+}
+enum Visibility {
+  PUBLIC    // Anyone can access
+  AUTHENTICATED  // Only logged-in users can access
+  PRIVATE   // Only owner can access
 }

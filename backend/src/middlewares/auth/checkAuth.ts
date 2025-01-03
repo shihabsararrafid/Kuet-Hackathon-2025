@@ -19,13 +19,17 @@ export const checkAuth = (types?: string[], required = true) => {
         req.cookies.access_token ??
         req.header("authentication")?.split(" ")[1];
       // console.log(token, "token");
+      if (!token && !required) {
+        req.user = null;
+        return next();
+      }
       if (!token) throw new AppError("Auth-error", "You Are Unauthorized", 401);
 
       const payload = (await jwtService.verifyToken(token)) as AuthPayload;
       req.user = payload;
       // console.log("hjer");
       // Check role access if types are specified
-      if (types?.length) {
+      if (types?.length && required) {
         const hasAccess = types.includes(payload.role);
         if (!hasAccess) {
           throw new AppError("Auth-error", "Forbidden access", 403);
@@ -51,7 +55,7 @@ export const checkAuth = (types?: string[], required = true) => {
           req.user = decoded;
 
           // Check role access if types are specified
-          if (types?.length) {
+          if (types?.length && required) {
             const hasAccess = types.includes(decoded.role);
             if (!hasAccess) {
               throw new AppError("Auth-error", "Forbidden access", 403);

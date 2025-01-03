@@ -1,16 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "../../domains/controllers/base.controller";
-import { AppError } from "../../libraries/error-handling/AppError";
-import React from "react";
-import { JwtService } from "../../domains/services/auth/jwt.service";
 import { AuthCookie } from "../../domains/services/auth/auth.cookie";
-import config from "../../configs";
-
+import { JwtService } from "../../domains/services/auth/jwt.service";
+import { AppError } from "../../libraries/error-handling/AppError";
 import AuthRepository, {
   VerifyEmailPayload,
 } from "../repositories/auth.respository";
-// import EmailService from "../services/email.service";
-import { render } from "@react-email/components";
 export default class AuthController extends BaseController {
   private authRepository: AuthRepository;
   // private emailService: EmailService;
