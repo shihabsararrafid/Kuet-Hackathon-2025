@@ -1,27 +1,12 @@
 "use client";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Languages,
-  Loader2,
-  Download,
-  Copy,
-  Share2,
-  Volume2,
-  Lock,
-  Users,
-  Globe,
-} from "lucide-react";
+import RichTextEditor from "@/components/rich-text/editor";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import RichTextEditor from "@/components/rich-text/editor";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -30,8 +15,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { motion } from "framer-motion";
+import {
+  Copy,
+  Download,
+  Globe,
+  Languages,
+  Loader2,
+  Lock,
+  Share2,
+  Users,
+  Volume2,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 // import { toast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
@@ -62,7 +61,7 @@ export default function TranslationForm() {
       setIsLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/v1/translations/",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/translations/`,
         {
           method: "POST",
           headers: {
@@ -125,7 +124,7 @@ export default function TranslationForm() {
   const handleDownload = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/v1/translations/generate-pdf/${pdfId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/translations/generate-pdf/${pdfId}`,
         {
           method: "POST",
           headers: {
@@ -166,7 +165,7 @@ export default function TranslationForm() {
       setIsSharing(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/v1/translations/shareability/${pdfId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/translations/shareability/${pdfId}`,
         {
           method: "PATCH",
           headers: {
@@ -215,163 +214,122 @@ export default function TranslationForm() {
         </p>
       </div>
 
-      <Tabs defaultValue="write" className="w-full">
-        <TabsList className="grid w-full grid-cols-1">
-          <TabsTrigger value="write" onClick={() => setActiveTab("write")}>
-            Write
-          </TabsTrigger>
-          {/* <TabsTrigger value="upload" onClick={() => setActiveTab("upload")}>
-            Upload Document
-          </TabsTrigger> */}
-        </TabsList>
+      <Card className="p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="about"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-lg font-medium">
+                    Enter Your Banglish Text
+                  </FormLabel>
+                  <FormControl>
+                    <RichTextEditor {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <TabsContent value="write">
-          <Card className="p-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
+            <div className="flex justify-between items-center">
+              <Button
+                type="submit"
+                size="lg"
+                className="gap-2"
+                disabled={isLoading}
               >
-                <FormField
-                  control={form.control}
-                  name="about"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-lg font-medium">
-                        Enter Your Banglish Text
-                      </FormLabel>
-                      <FormControl>
-                        <RichTextEditor {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-between items-center">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="gap-2"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Translating...
-                      </>
-                    ) : (
-                      <>
-                        <Languages className="h-4 w-4" />
-                        Translate
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-
-            {translatedText && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-8 space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-medium">Translated Text</h2>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleSpeak}>
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={copyToClipboard}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={!pdfId || isSharing}
-                        >
-                          {isSharing ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Share2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleShare("PRIVATE")}
-                          className="cursor-pointer"
-                        >
-                          <Lock className="mr-2 h-4 w-4" />
-                          <span>Private</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleShare("AUTHENTICATED")}
-                          className="cursor-pointer"
-                        >
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>Authenticated Users</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleShare("PUBLIC")}
-                          className="cursor-pointer"
-                        >
-                          <Globe className="mr-2 h-4 w-4" />
-                          <span>Public</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <Button
-                      onClick={handleDownload}
-                      disabled={!pdfId}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <Card className="p-4 bg-muted">
-                  <div
-                    className="text-lg leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: translatedText }}
-                  />
-                </Card>
-              </motion.div>
-            )}
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="upload">
-          <Card className="p-6">
-            <div className="text-center">
-              <input
-                type="file"
-                className="hidden"
-                id="file-upload"
-                accept=".txt,.doc,.docx"
-              />
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
-              >
-                <span className="text-sm text-muted-foreground">
-                  Upload a document (.txt, .doc, .docx)
-                </span>
-              </label>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Translating...
+                  </>
+                ) : (
+                  <>
+                    <Languages className="h-4 w-4" />
+                    Translate
+                  </>
+                )}
+              </Button>
             </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </form>
+        </Form>
+
+        {translatedText && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8 space-y-4"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-medium">Translated Text</h2>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleSpeak}>
+                  <Volume2 className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={copyToClipboard}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!pdfId || isSharing}
+                    >
+                      {isSharing ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Share2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => handleShare("PRIVATE")}
+                      className="cursor-pointer"
+                    >
+                      <Lock className="mr-2 h-4 w-4" />
+                      <span>Private</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleShare("AUTHENTICATED")}
+                      className="cursor-pointer"
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Authenticated Users</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleShare("PUBLIC")}
+                      className="cursor-pointer"
+                    >
+                      <Globe className="mr-2 h-4 w-4" />
+                      <span>Public</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button
+                  onClick={handleDownload}
+                  disabled={!pdfId}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <Card className="p-4 bg-muted">
+              <div
+                className="text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: translatedText }}
+              />
+            </Card>
+          </motion.div>
+        )}
+      </Card>
     </motion.div>
   );
 }
