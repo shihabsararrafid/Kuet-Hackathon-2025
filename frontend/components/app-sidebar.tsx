@@ -71,32 +71,16 @@ const data = {
       ],
     },
     {
-      title: "Profile & Account",
-      url: "/profile",
+      title: "Contribution",
+      url: "/contribution",
       items: [
         {
-          title: "My Profile",
-          url: "/profile/overview",
+          title: "New contribution",
+          url: "/contribution/new",
         },
         {
-          title: "Edit Profile",
-          url: "/profile/edit",
-        },
-        {
-          title: "Activity History",
-          url: "/profile/activity",
-        },
-        {
-          title: "Usage Statistics",
-          url: "/profile/stats",
-        },
-        {
-          title: "Subscription Plan",
-          url: "/profile/subscription",
-        },
-        {
-          title: "Notification Settings",
-          url: "/profile/notifications",
+          title: "Contribution History",
+          url: "/contribution/history",
         },
       ],
     },

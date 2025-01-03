@@ -22,6 +22,7 @@ model User{
   role             Role   @default(USER)
   transaltions   translations[]
   chats           Chat[]
+  contributions   Contribution[]
   @@index([email])
 }
 model translations {
@@ -47,6 +48,21 @@ model Chat {
   updatedAt   DateTime     @updatedAt
   user        User         @relation(fields: [userId], references: [id])
 }
+// Contribution model
+model Contribution {
+  id          String              @id @default(cuid())
+  // Source text details
+  banglishText String
+  banglaText   String
+  isApproved   Boolean          @default(false)
+  // User who contributed
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  
+  
+  
+}
+
 
 model Message {
   id          Int        
