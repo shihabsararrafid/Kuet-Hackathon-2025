@@ -19,6 +19,13 @@ router.get(
   //   validateRequest({ schema: registerSchema }),
   (req, res, next) => translationController.getTranslations(req, res, next),
 );
+router.get(
+  "/all-pdfs",
+  checkAuth(["USER"]),
+  //   validateRequest({ schema: registerSchema }),
+  (req, res, next) =>
+    translationController.getPublicTranslations(req, res, next),
+);
 router.post(
   "/generate-pdf/:id",
   checkAuth(["USER"]),

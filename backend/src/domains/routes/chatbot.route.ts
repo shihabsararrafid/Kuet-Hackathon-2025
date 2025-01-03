@@ -14,6 +14,12 @@ router.post(
   (req, res, next) => chatbotController.translateText(req, res, next),
 );
 router.post(
+  "/from-pdf",
+  checkAuth(),
+  //   validateRequest({ schema: registerSchema }),
+  (req, res, next) => chatbotController.createChatFromPDfs(req, res, next),
+);
+router.post(
   "/:chatId",
   checkAuth(),
   //   validateRequest({ schema: registerSchema }),

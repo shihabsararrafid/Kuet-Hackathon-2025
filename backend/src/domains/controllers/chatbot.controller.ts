@@ -28,6 +28,25 @@ export default class ChatbotController extends BaseController {
       }
     }
   }
+  async createChatFromPDfs(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const translations = await this.chatbotRepository.getResponseFromPdf(
+        req.body.pdfLink,
+        req.user.id,
+      );
+      this.sendSuccessResponse(res, translations);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
   async addMessageToText(
     req: Request,
     res: Response,

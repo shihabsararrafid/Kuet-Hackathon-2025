@@ -43,6 +43,25 @@ export default class TranslationController extends BaseController {
       }
     }
   }
+
+  async getPublicTranslations(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const translations = await this.translationRepository.getAllPublic(
+        req.user.id,
+      );
+      this.sendSuccessResponse(res, translations);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
   async generatePdf(
     req: Request,
     res: Response,

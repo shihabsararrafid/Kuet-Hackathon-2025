@@ -49,12 +49,14 @@ model Chat {
 }
 
 model Message {
-  id          Int       @id 
+  id          Int        
   chatId      String
   question    String
   content     String
   createdAt   DateTime     @default(now())
   chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@id([id,chatId])
 }
 enum Role {
   USER

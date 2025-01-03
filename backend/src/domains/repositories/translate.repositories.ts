@@ -34,6 +34,34 @@ export default class TranslationRepository extends BaseRepository<translations> 
       }
     }
   }
+  async getAllPublic(userId: string): Promise<Partial<translations>[]> {
+    try {
+      const result = await this.prisma.translations.findMany({
+        where: {
+          userId,
+          visibility: "PRIVATE",
+        },
+      });
+      const others = await this.prisma.translations.findMany({
+        where: {
+          visibility: { in: ["AUTHENTICATED", "PUBLIC"] },
+        },
+      });
+      return [...result, ...others];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "database-error",
+          `Failed to load translations: ${
+            error instanceof Error ? error.message : "Unexpected error"
+          }`,
+          500,
+        );
+      }
+    }
+  }
   getById(id: string): Promise<Partial<translations> | null> {
     throw new Error("Method not implemented.");
   }

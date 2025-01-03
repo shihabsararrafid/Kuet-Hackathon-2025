@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileUp, Send, FileText, Sparkles } from "lucide-react";
+import { FileUp, Send, FileText, Sparkles, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,18 +47,24 @@ const BanglishChatbot: React.FC = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [attachedPDFs, setAttachedPDFs] = useState<PDFFile[]>([]);
+  const [attachedPDF, setAttachedPDF] = useState<PDFFile | null>(null);
   const [storedPDFs, setStoredPDFs] = useState<StoredPDF[]>([]);
   const [isStoredPDFDialogOpen, setIsStoredPDFDialogOpen] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
 
   // Fetch stored PDFs when component mounts
   useEffect(() => {
     const fetchStoredPDFs = async () => {
       try {
-        const response = await axios.get("/api/pdfs");
-        setStoredPDFs(response.data.pdfs);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/translations/all-pdfs`,
+          {
+            withCredentials: true,
+          }
+        );
+        setStoredPDFs(response.data.data);
       } catch (error) {
         console.error("Failed to fetch stored PDFs", error);
       }
@@ -77,12 +83,10 @@ const BanglishChatbot: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
     const formData = new FormData();
-    Array.from(files).forEach((file) => {
-      formData.append("pdfs", file);
-    });
+    formData.append("pdfs", files[0]);
 
     try {
       const response = await axios.post("/api/chat/upload-pdf", formData, {
@@ -91,11 +95,11 @@ const BanglishChatbot: React.FC = () => {
         },
       });
 
-      const uploadedFiles: PDFFile[] = response.data.files;
-      setAttachedPDFs((prev) => [...prev, ...uploadedFiles]);
-      toast({ title: `${uploadedFiles.length} PDF(s) uploaded successfully` });
+      const uploadedFile: PDFFile = response.data.files[0];
+      setAttachedPDF(uploadedFile);
+      toast({ title: `PDF uploaded successfully: ${uploadedFile.name}` });
     } catch (error) {
-      toast({ title: "Failed to upload PDF(s)", variant: "destructive" });
+      toast({ title: "Failed to upload PDF", variant: "destructive" });
       console.error(error);
     }
   };
@@ -108,7 +112,7 @@ const BanglishChatbot: React.FC = () => {
       path: pdf.path,
     };
 
-    setAttachedPDFs((prev) => [...prev, newPDFFile]);
+    setAttachedPDF(newPDFFile);
     setIsStoredPDFDialogOpen(false);
     toast({ title: `${pdf.title} added successfully` });
   };
@@ -123,9 +127,9 @@ const BanglishChatbot: React.FC = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+          {/* <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
             Upload from Computer
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem onSelect={() => setIsStoredPDFDialogOpen(true)}>
             Select from Stored PDFs
           </DropdownMenuItem>
@@ -145,7 +149,7 @@ const BanglishChatbot: React.FC = () => {
       content: input,
       role: "user",
       timestamp: new Date(),
-      files: attachedPDFs.map((pdf) => pdf.path),
+      files: attachedPDF ? [attachedPDF.path] : undefined,
     };
 
     // Optimistically add user message
@@ -154,19 +158,42 @@ const BanglishChatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/chat/new", {
-        message: input,
-        pdfs: attachedPDFs.map((pdf) => pdf.path),
-      });
+      // Decide which endpoint to use based on whether we have an existing chat
+      const endpoint = currentChatId
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/chatbot/${currentChatId}`
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/chatbot`;
 
-      const aiMessage: MessageType = {
-        id: `ai-${Date.now()}`,
-        content: response.data.response,
-        role: "ai",
-        timestamp: new Date(),
+      const payload = {
+        message: input,
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
+      const response = await axios.post(endpoint, payload, {
+        withCredentials: true,
+      });
+
+      console.log(response);
+
+      // If it's a new chat, set the chat ID
+      if (!currentChatId) {
+        setCurrentChatId(response.data.data.id);
+        // Add AI message to messages
+        const aiMessage: MessageType = {
+          id: `ai-${Date.now()}`,
+          content: response.data.data.messages[0].content,
+          role: "ai",
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+      } else {
+        const aiMessage: MessageType = {
+          id: `ai-${Date.now()}`,
+          content: response.data.data.content,
+          role: "ai",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      }
     } catch (error) {
       toast({ title: "Failed to send message", variant: "destructive" });
       console.error(error);
@@ -178,8 +205,8 @@ const BanglishChatbot: React.FC = () => {
   };
 
   // Remove attached PDF
-  const removeAttachedPDF = (id: string) => {
-    setAttachedPDFs((prev) => prev.filter((pdf) => pdf.id !== id));
+  const removeAttachedPDF = () => {
+    setAttachedPDF(null);
   };
 
   return (
@@ -209,25 +236,20 @@ const BanglishChatbot: React.FC = () => {
           </ScrollArea>
         </CardContent>
 
-        {attachedPDFs.length > 0 && (
+        {attachedPDF && (
           <div className="px-4 pb-2 flex gap-2">
-            {attachedPDFs.map((pdf) => (
-              <div
-                key={pdf.id}
-                className="flex items-center bg-gray-100 p-2 rounded-md"
+            <div className="flex items-center bg-gray-100 p-2 rounded-md">
+              <FileText className="mr-2 h-5 w-5 text-blue-500" />
+              <span className="text-sm">{attachedPDF.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-2 h-6 w-6"
+                onClick={removeAttachedPDF}
               >
-                <FileText className="mr-2 h-5 w-5 text-blue-500" />
-                <span className="text-sm">{pdf.name}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-2 h-6 w-6"
-                  onClick={() => removeAttachedPDF(pdf.id)}
-                >
-                  ✕
-                </Button>
-              </div>
-            ))}
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
 
@@ -235,7 +257,6 @@ const BanglishChatbot: React.FC = () => {
           <input
             type="file"
             accept=".pdf"
-            multiple
             ref={fileInputRef}
             onChange={handleFileUpload}
             className="hidden"
@@ -271,7 +292,7 @@ const BanglishChatbot: React.FC = () => {
             {storedPDFs.length === 0 ? (
               <p className="text-center text-gray-500">No stored PDFs found</p>
             ) : (
-              storedPDFs.map((pdf) => (
+              storedPDFs?.map((pdf) => (
                 <div
                   key={pdf.id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-100 cursor-pointer"
