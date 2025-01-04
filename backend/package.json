@@ -22,6 +22,9 @@
     "migrate-dev": "prisma migrate dev",
     "dbPush": "prisma db push"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

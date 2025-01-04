@@ -20,6 +20,7 @@ model User{
   isEmailVerified  Boolean   @default(false)
   isActive         Boolean   @default(true)
   role             Role   @default(USER)
+  isProfilePublic  Boolean @default(false)
   transaltions   translations[]
   chats           Chat[]
   contributions   Contribution[]

@@ -8,7 +8,7 @@ export abstract class BaseRepository<T> {
   }
 
   // abstract getAll(): Promise<any>;
-  abstract getById(id: string): Promise<Partial<T> | null>;
+  // abstract getById(id: string): Promise<Partial<T> | null>;
   // abstract create(data: Partial<T>): Promise<any>;
   abstract update(id: string, data: Partial<T>): Promise<Partial<T>>;
   // abstract delete(id: string): Promise<Partial<T>>;

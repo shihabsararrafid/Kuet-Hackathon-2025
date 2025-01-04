@@ -1,13 +1,13 @@
 import express from "express";
-import { join } from "path";
 import fs from "fs";
+import { join } from "path";
 import prisma from "../../libraries/db/prisma";
-import { loginSchema, registerSchema } from "../interfaces/auth.interface";
-import { JwtService } from "../services/auth/jwt.service";
-import EmailService from "../services/email.service";
-import AuthRepository from "../repositories/auth.respository";
-import AuthController from "../controllers/auth.controller";
+import { checkAuth } from "../../middlewares/auth/checkAuth";
 import { validateRequest } from "../../middlewares/request-validate";
+import AuthController from "../controllers/auth.controller";
+import { loginSchema, registerSchema } from "../interfaces/auth.interface";
+import AuthRepository from "../repositories/auth.respository";
+import { JwtService } from "../services/auth/jwt.service";
 const privateKeyFile = join(process.cwd(), "secretKeys/tokenECPrivate.pem");
 const publicKeyPath = join(process.cwd(), "secretKeys/tokenECPublic.pem");
 const privateKey = fs.readFileSync(privateKeyFile, "utf-8");
@@ -35,7 +35,10 @@ router.post(
 router.post("/logout", (req, res, next) =>
   authController.logoutUser(req, res, next),
 );
-router.post("/verify-email", (req, res, next) =>
-  authController.verifyEmail(req, res, next),
+router.get("/profile", checkAuth(), (req, res, next) =>
+  authController.getUserProfile(req, res, next),
+);
+router.get("/user/profile/:id", (req, res, next) =>
+  authController.getUserProfile(req, res, next),
 );
 export default router;

@@ -148,6 +148,82 @@ export default class AuthRepository extends BaseRepository<User> {
         );
       }
     }
+  } // Get user profile
+  async getProfile(id: string): Promise<Partial<any>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          _count: {
+            select: {
+              transaltions: true,
+              contributions: true,
+              chats: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new AppError("user-not-found", "User not found", 404);
+      }
+
+      return {
+        ...user,
+        translationsCount: user._count.transaltions,
+        contributionsCount: user._count.contributions,
+        chatsCount: user._count.chats,
+      };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "database-error",
+          `Failed to create new user: ${
+            error instanceof Error ? error.message : "Unexpected error"
+          }`,
+          500,
+        );
+      }
+    }
+  }
+  async getOtherUserProfile(id: string): Promise<Partial<any>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id, isProfilePublic: true },
+        include: {
+          transaltions: {
+            where: {
+              visibility: "PUBLIC",
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new AppError("user-not-found", "User not found", 404);
+      }
+
+      return {
+        ...user,
+      };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "database-error",
+          `Failed to create new user: ${
+            error instanceof Error ? error.message : "Unexpected error"
+          }`,
+          500,
+        );
+      }
+    }
   }
   update(id: string, data: Partial<User>): Promise<Partial<User>> {
     throw new Error("Method not implemented.");
