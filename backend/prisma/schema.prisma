@@ -14,4 +14,72 @@ datasource db {
 }
 model User{
   id        String  @unique @id @default(cuid())
+  email     String  @unique
+  password  String
+  salt      String
+  isEmailVerified  Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  role             Role   @default(USER)
+  transaltions   translations[]
+  chats           Chat[]
+  contributions   Contribution[]
+  @@index([email])
+}
+model translations {
+  id         String  @id @default(cuid())
+  rawText    String
+  translatedText String?
+  pdfLink       String?
+  visibility    Visibility @default(PRIVATE)  // New field
+  isPublic      Boolean   @default(false)
+  title         String?
+  caption       String?
+  createdAt     DateTime  @default(now())
+  totalVisits   Int      @default(0)
+  userId        String?
+  user           User?    @relation(fields: [userId],references: [id],onDelete: Cascade)
+}
+model Chat {
+  id          String       @id @default(cuid())
+  userId      String
+  title       String?
+  messages    Message[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id])
+}
+// Contribution model
+model Contribution {
+  id          String              @id @default(cuid())
+  // Source text details
+  banglishText String
+  banglaText   String
+  isApproved   Boolean          @default(false)
+  // User who contributed
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  
+  
+  
+}
+
+
+model Message {
+  id          Int        
+  chatId      String
+  question    String
+  content     String
+  createdAt   DateTime     @default(now())
+  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@id([id,chatId])
+}
+enum Role {
+  USER
+  ADMIN
+}
+enum Visibility {
+  PUBLIC    // Anyone can access
+  AUTHENTICATED  // Only logged-in users can access
+  PRIVATE   // Only owner can access
 }
