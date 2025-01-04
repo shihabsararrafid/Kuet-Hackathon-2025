@@ -47,6 +47,7 @@ export default function TranslationForm() {
   const [translatedText, setTranslatedText] = useState("");
   const [pdfId, setPdfId] = useState<string>("");
   const [isSharing, setIsSharing] = useState(false);
+  const [isGeneratingPdf, setGeneratingPdf] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState("write");
 
@@ -124,6 +125,7 @@ export default function TranslationForm() {
   };
   const handleDownload = async () => {
     try {
+      setGeneratingPdf(true);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/translations/generate-pdf/${pdfId}`,
         {
@@ -158,6 +160,8 @@ export default function TranslationForm() {
         description: "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setGeneratingPdf(false);
     }
   }; // Add sharing handler
   const handleShare = async (
@@ -319,7 +323,11 @@ export default function TranslationForm() {
                   variant="outline"
                   size="sm"
                 >
-                  <Download className="h-4 w-4" />
+                  {isGeneratingPdf ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>

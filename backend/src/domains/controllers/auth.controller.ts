@@ -36,6 +36,40 @@ export default class AuthController extends BaseController {
       }
     }
   }
+  async getUserProfile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      // const {id}
+      const user = await this.authRepository.getProfile(req.user.id);
+      this.sendSuccessResponse(res, user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
+  async getOtherUserProfile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.authRepository.getOtherUserProfile(id);
+      this.sendSuccessResponse(res, user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.sendErrorResponse(res, error);
+      } else {
+        next(error);
+      }
+    }
+  }
   async loginUser(
     req: Request,
     res: Response,

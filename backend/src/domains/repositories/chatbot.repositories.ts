@@ -15,7 +15,7 @@ export default class ChatbotRepository extends BaseRepository<Chat> {
   }
   async getBengaliText(msg: string) {
     try {
-      const response = await axios.post("http://192.168.11.97:6000/translate", {
+      const response = await axios.post("http://192.168.11.97:6001/translate", {
         text: msg,
       });
       if (!response) {

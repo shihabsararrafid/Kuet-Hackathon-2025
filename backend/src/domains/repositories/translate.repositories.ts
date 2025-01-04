@@ -80,15 +80,16 @@ export default class TranslationRepository extends BaseRepository<translations> 
       //   console.log("Stripped text:", rawTextWithoutHtml);
 
       // Call translation API with stripped text
-      const response = await axios.post("http://192.168.11.97:6000/translate", {
+      const response = await axios.post("http://192.168.11.97:6001/translate", {
         text: rawTextWithoutHtml,
       });
       if (!response) {
         throw new Error("Translation service failed");
       }
       // Get translated pieces
-      const translatedText = response.data.translation; // "কি কর আমি ছিনি না"
-      const translatedWords = translatedText.split(" "); // ['কি', 'কর', 'আমি', 'ছিনি', 'না']
+      const translatedText = response.data.translation;
+      const translatedWords = translatedText.split(" ");
+
       let currentIndex = 0;
       // Create new HTML by replacing text content while preserving structure
       const htmlRoot = parse(formattedText);
@@ -118,7 +119,13 @@ export default class TranslationRepository extends BaseRepository<translations> 
 
       htmlRoot.childNodes.forEach(replaceText);
       const formattedTranslation = htmlRoot.toString();
-      //   console.log(formattedTranslation);
+      //   const response1 = await axios.post(
+      //     "http://192.168.11.97:6000/generate-summary",
+      //     {
+      //       text: translatedText,
+      //     },
+      //   );
+      //   console.log(response1);
       // Save to database
       return this.prisma.translations.create({
         data: {
@@ -148,6 +155,21 @@ export default class TranslationRepository extends BaseRepository<translations> 
       const translations = await this.prisma.translations.findUnique({
         where: { id },
       });
+      const root = parse(translations?.translatedText ?? "");
+      const rawTextWithoutHtml = root.textContent;
+      const response1 = await axios.post(
+        "http://192.168.11.97:6000/generate-summary",
+        {
+          article_text: rawTextWithoutHtml,
+        },
+      );
+      await this.prisma.translations.update({
+        where: { id },
+        data: {
+          title: response1.data.summary,
+        },
+      });
+      console.log(response1.data.summary);
 
       const uploadDir = join(process.cwd(), "data/pdf");
       if (!fs.existsSync(uploadDir)) {
